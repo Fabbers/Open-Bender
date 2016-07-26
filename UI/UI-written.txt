@@ -1,0 +1,83 @@
+﻿Start/Home Page
+
+	Menu on top -- File - Mode - Config
+
+	Buttons:  	Homing  links to Homing Page 
+
+		Load - links to Load Page
+		
+		Manual op - Links to Manual Operation Page
+		
+		Calibration - Links to Calibration Page
+
+		Offset  - Links to Offset Page
+
+	Center Control:
+               	Purpose: Manual Control of Bender directly from box of bend pin direction and forwarding and reversing feed drive.
+			Arrows on buttons indicate various sensitivy or number of steps startign from 1 step (outer arrow) to 10 step (mid arrow) to 100 stops (inner arrow)
+			
+			Duck Button for manual duck function
+
+
+	Setting Right Panel:  	Material Profile (from last session) by default, but with selectable exsisting material profiles
+
+			Jog Speed:  Sets speed of operationa of steps
+					adjusted by slider
+
+			Units:  Radio buttons for Inches or MM
+
+			Material Diateter:
+
+				indicated diameter (not selectable) taken from data in material profile
+
+Homing: Purpose- To find "0 position" or home of the bend pin directly in front of the wire orafice, because bending procedures must have the correct starting reference. 
+
+
+	Homing Button:  Runs the homing routing to find the home position.
+
+
+	Verified Button: Confirms that the pin is directly infront of the wire head orifice.
+
+        (if homing routing is run and bend pin in not direclty in front of the orifice) Manual control is provided for fine tuning...
+
+
+Load: Purpose- To provid a screen to load a vector file
+
+	Should accept with drop and drag or selection by directory...
+	Should have slider indicating % while loading
+	OPEN button: should open file after loaded.
+
+Manual Operation: Purpose- To provide a screen to load repeatable values for repeatable manual bending
+
+	SET Button: opens up manual input boxes in order to input values.
+	ACCEPT Button: accepts the values for the button
+
+	Design Note!!!  After the manual values are set the arrows on the manual operation are diabled and (disapear) Because the button will only function from the set values
+
+
+Calibration: Purpose- To provide a way to calibrate new materials and account for "spring-back"
+
+	START Button: Starts the procedure but should be inactive until a diameter value is entered in settings
+	VERIFY button:  sets the actual angle of bending (triggered after manual fine tuning till the bend pin touching the wire)
+	NEXT Button: triggers the calibration of the next angle/value
+
+
+	Calibration Angle Table:  As viewed, but with some color indicator of which angle/data input is active
+	
+	Manual Control Box:  standard for fine tuning during the verify stage
+
+	Setting Panel:
+
+	Material Profile: Input Box (name)
+	Material Diameter: Input Box (value)
+	Units: Radio Buttons Inches MM
+	RECALIBRATE button:  redoes calibration on exsisting angle/data box
+	CANCEL button: cancels calibration regime to restart process
+
+	!!Propose Bend to theoretical angle...then comes off 30% for the calibration calculation!!
+
+
+
+
+				
+
