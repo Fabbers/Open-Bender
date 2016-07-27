@@ -1,0 +1,46 @@
+Bender Non-Hardware Requirements
+
+
+
+
+Start/Home
+
+	Manual Control:  FW & UI
+	Buttons: Links
+
+Homing:
+
+	Homing Routing: FW
+	Manual Control: FW & UI
+	Buttons: FW & UI
+
+Load::
+
+	Loads file: ??
+
+
+Manual Operation:
+
+	FW & UI
+
+Calibration:
+
+	Create Calibration profile has influence from FW, BackEnd ??
+
+Material Profile:
+
+	Acept file and develope points based on Vector Files:  BE
+	Generates path and bend points base on profile and selections: BE
+
+Bend Path:
+	Interaction between FE and BE with start point set
+	Show length of wire needed: BE or FW??
+	Render bend path: BE
+	Save file with file data, profile and bend point data: BE
+
+
+	
+
+
+
+
