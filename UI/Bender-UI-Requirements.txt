@@ -1,0 +1,11 @@
+Bender UI
+
+loading of SVG file (later add Dwg format)
+Preview of submitted SVG file
+SD Card saving
+Manual Mode:  Feed/Retract (Feed Motor) CW/CCW (Bend Motor) UP/Down (Bending Pin)
+Homing Routine
+Wire Calibration Routine
+Jog speed
+Material profile select
+material profile create

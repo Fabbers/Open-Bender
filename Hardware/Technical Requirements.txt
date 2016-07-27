@@ -1,0 +1,59 @@
+
+
+Design Specification for Fab WireBender  
+Date: 15 April 2016
+
+Surface/Top
+
+Must have surface sheet that allows for use of Macmet drive unit, removable bend head, solenoid pin,one or two feed guides.  
+Must also have holes for bolts for support profile. 
+Probably should have connections to drive support legs in some manner.  
+Should in incorporate some wedge or inclined profile to avoid bent wire from interfering with drive.
+
+Drive (Macmet Drive)
+
+Drive must be supported with 4 legs attached to bottom and probably should be attached to surface
+The four support legs should be cut out to allow for the drive to be raised and lowered (z-height adjustment) in order that the various diameter grooves on the drive can be arrange flush with the surface.
+A motor mount should be designed under the drive in order to couple the motor to the drive shaft.
+Diamter and length of Shaft can be specified.
+Specific Motor-drive coupling should be specified.
+
+Drive Specs
+Thickness of Metal frame 3 sides
+Thickness of Metal frame 1 side
+Thickness of drive wheel
+Length
+Distance from top of drive wheel to bottom shaft (minimum)
+
+
+Bend Head/Solenoid
+
+
+Bend Head – Stainless steel with top overhang, 
+Radius as per existing part, unless research tell something differently
+Bend Head - Multiple sizes dependent on diameter (one form/shape) without 90 degree angle from bender surface
+One 24 volt solenoid
+Underside of bending pin should incorporate mechanical limit switches
+Specification of 24V solenoid
+Need motor mounting bracket for Bend motor
+Need Nylon Gear mount 
+All mounted to 3mm aluminum base.
+Gears (orignal metal small gear) Plus different gear (potentially bigger) to cover 135 degrees on both sides.
+
+Surface Support
+at least 4 pcs of profile.  If exposed prefer rounded exposure.
+Length must be sufficient for Motor attached to Mecmet drive to fit
+
+Sides:
+Perferated sides
+
+Back:
+
+Back should allow for connecting of optional straightener
+Prefer non perforated back 
+
+
+
+
+
+
