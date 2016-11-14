@@ -32,47 +32,41 @@ int values[300]; //creates array
 
 void setup() {
   Serial.begin(9600);
-  pinMode (bendMotorPls, OUTPUT); //Declaring motor pins as out
-  pinMode (zMotorPls, OUTPUT); 
-  pinMode (feedMotorPls, OUTPUT); 
-  pinMode (bendMotorAWO, OUTPUT); 
-  pinMode (zMotorAWO, OUTPUT); 
-  pinMode (feedMotorAWO, OUTPUT); 
-  pinMode (bendMotorDir, OUTPUT);
-  pinMode (zMotorDir, OUTPUT); 
-  pinMode (feedMotorDir, OUTPUT); 
-  pinMode (benderPin, OUTPUT); 
+  pinMode (bendMotorPls,  OUTPUT); //Declaring motor pins as out
+  pinMode (zMotorPls,     OUTPUT); 
+  pinMode (feedMotorPls,  OUTPUT); 
+  pinMode (bendMotorAWO,  OUTPUT); 
+  pinMode (zMotorAWO,     OUTPUT); 
+  pinMode (feedMotorAWO,  OUTPUT); 
+  pinMode (bendMotorDir,  OUTPUT);
+  pinMode (zMotorDir,     OUTPUT); 
+  pinMode (feedMotorDir,  OUTPUT); 
+  pinMode (benderPin,     OUTPUT); 
+  
   digitalWrite (bendMotorPls, LOW); //starts with everything off
-  digitalWrite (zMotorPls, LOW); 
-  digitalWrite (feedMotorPls, LOW); 
-  digitalWrite (benderPin, LOW);
-  digitalWrite (zMotorAWO, HIGH);
+  digitalWrite (zMotorPls,    LOW); 
+  digitalWrite (feedMotorPls, LOW);
+   
+  digitalWrite (benderPin,    LOW);
+  
+  digitalWrite (zMotorAWO,    HIGH);
   digitalWrite (feedMotorAWO, HIGH);
   digitalWrite (bendMotorAWO, HIGH);
+  
   delay(10);
 
-int numb_of_sides=8;
+  int numb_of_sides = 8;
+  
 for(int i=0;i<numb_of_sides;i++)
 {
   feed (50);
   delay(1);
   bend (40);
   delay(1);
-  }
-  
- // feed (100);
-  // duck ();
-  
-}//setup()
+  }  
+}
 
+void loop() 
+{
 
-//////
-void loop() {
-
-}//loop()
-
-
-
-
-
-
+}
