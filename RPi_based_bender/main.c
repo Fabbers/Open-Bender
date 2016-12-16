@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <time.h>
+#include <stdlib.h>
 
 #define FEED_MOTOR_STEPS_PER_REVOLUTION 4000 
 #define FEED_MOTOR_SHAFT_DIAMETER 30.4
@@ -69,20 +70,21 @@ void waitSec(float seconds)
 		msec = diff * 1000 / CLOCKS_PER_SEC;
 		printf("%.3f seconds %.3f milliseconds\n", msec/1000, msec);
 	}
-}  
-void process_motor(int motor)
+}
+
+
+void motor_impulse(int motor)
 {
 	bcm2835_gpio_write(motor, HIGH); //moves bender pin back to home position ready for next feed
 	waitSec(pulseWidth);
 	bcm2835_gpio_write(motor, LOW); //moves bender pin back to home position ready for next feed
 	waitSec(pulseDelay);
-	printf("Done %f steps\n", i);
 }
 
 
 void bendWire(float angle);
 void feedWire(float lenght);
-void rotatePin(bool direction);
+void rotatePin(bool direction, float steps);
 void duckPin();
 
 int main()
@@ -101,7 +103,7 @@ void bendWire(float angle)
 {
 	if (angle != 0)
 	{
-		printf("Bending %d \n", angle);
+		printf("Bending %.2f \n", angle);
 		bool dir=cw;
 		bool back=ccw;
 		
@@ -115,11 +117,11 @@ void bendWire(float angle)
 		angle = abs(angle);
 		steps = angle * BEND_MOTOR_STEPS_PER_DEGREE;
 
-		printf("Steps %s \n", steps);
+		printf("Steps %.0f \n", steps);
 
-		rotatePin(dir, steps) //move bender pin
+		rotatePin(dir, steps); //move bender pin
 		waitSec(0.1);
-		rotatePin(back, steps) //return bender pin
+		rotatePin(back, steps); //return bender pin
 	}
 }
 /**/
@@ -130,18 +132,18 @@ void feedWire(float lenght)
 {
 	if (lenght != 0)
 	{
-		printf("Bending %d \n", lenght);
+		printf("Bending %.2f \n", lenght);
 
 		float steps = 0;
 		steps = lenght * FEED_MOTOR_STEPS_PER_MILIMETER;
 		
-		printf("Steps %s \n", steps);
+		printf("Steps %.0f \n", steps);
 
 		bcm2835_gpio_write(feedMotorDir, 1);  //feed motor only moves forward
 
 		for (int i=0; i < steps; i++) //rotate feed motor appropriate number of steps 
 		{
-			process_motor(feedMotorPls)
+			motor_impulse(feedMotorPls);
 		}
 	}
 }
@@ -149,17 +151,16 @@ void feedWire(float lenght)
 
 
 /*PIN ROTATION FUNCTION*/
-void rotatePin(bool direction, float angle, float steps) //moves bender pin
+void rotatePin(bool direction, float steps) //moves bender pin
 {
-	steps = angle * BEND_MOTOR_STEPS_PER_DEGREE;
-
-	printf("Steps %s \n", steps);
+	printf("Steps %.0f \n", steps);
 
 	bcm2835_gpio_write(bendMotorDir, direction); //moves bender pin back to home position ready for next feed
 	
 	for (int i=0; i < steps; i++)
 	{
-		process_motor(bendMotorPls);
+		motor_impulse(bendMotorPls);
+		printf("Done %d steps\n", i);
 	}
 }
 /**/
