@@ -37,8 +37,8 @@ const int bendMotorDir = 6; //RPI_GPIO_P1_6;
 const int feedMotorDir = 8; //RPI_GPIO_P1_8;
 
 //misc program constants
-const int pulseWidth = 0.1/1000; //in microseconds
-const int pulseDelay = 1/1000; //in microseconds
+const int pulseWidth = 0.1; //100 microseconds
+const int pulseDelay = 1; //1000 microseconds
 
 // Drive directions in english
 const bool ccw = true; // counter-clockwise drive direction
@@ -65,17 +65,17 @@ void setup()
 
 }
 
-void waitSec(float seconds)
+void waitmSec(float seconds)
 {
 	clock_t start, diff;
 	float msec = 0;
 	start = clock();
-
-	while (msec/1000 < seconds)
+	
+	while (msec < seconds)
 	{
 		diff = clock() - start;
-		msec = diff * 1000 / CLOCKS_PER_SEC;
-		//printf("%.3f seconds %.3f milliseconds\n", msec/1000, msec);
+		msec = diff * 2000 / CLOCKS_PER_SEC;
+//		printf("%.3f seconds %.3f milliseconds %.0f microseconds\n", msec/1000, msec, msec*1000);
 	}
 }
 
@@ -83,9 +83,9 @@ void waitSec(float seconds)
 void motor_impulse(int motor)
 {
 	bcm2835_gpio_write(motor, HIGH); //moves bender pin back to home position ready for next feed
-	waitSec(pulseWidth);
+	waitmSec(pulseWidth);
 	bcm2835_gpio_write(motor, LOW); //moves bender pin back to home position ready for next feed
-	waitSec(pulseDelay);
+	waitmSec(pulseDelay);
 }
 
 
@@ -101,13 +101,15 @@ int main(int argc, char **argv)
 	Bending function and feeding function should be linked in future to provide lenght/angle interdependence.
 	********/
 	setup();
+
 	int i = 0;
+
 	while (i < 1)
 	{
-//		feedWire(50);
-//		wait(0.1/100);
+		feedWire(50);
+		waitmSec(1);
 		bendWire(45);
-		wait(0.1/100);
+		waitmSec(1);
 		i++;
 	}
 
@@ -137,10 +139,8 @@ void bendWire(float angle)
 		angle = abs(angle);
 		steps = angle * BEND_MOTOR_STEPS_PER_DEGREE;
 
-		printf("Steps %.0f \n", steps);
-
 		rotatePin(dir, steps); //move bender pin
-		waitSec(0.1);
+		waitmSec(100);
 		rotatePin(back, steps); //return bender pin
 	}
 }
@@ -153,7 +153,7 @@ void feedWire(float lenght)
 	int i = 0;
 	if (lenght != 0)
 	{
-		printf("Bending %.2f \n", lenght);
+		printf("Feeding %.2f \n", lenght);
 
 		float steps = 0;
 		steps = lenght * FEED_MOTOR_STEPS_PER_MILIMETER;
@@ -182,7 +182,7 @@ void rotatePin(bool direction, float steps) //moves bender pin
 	for (i=0; i < steps; i++)
 	{
 		motor_impulse(bendMotorPls);
-		printf("Done %d steps\n", i);
+//		printf("Bended to %.2f angle\n", i/BEND_MOTOR_STEPS_PER_DEGREE);
 	}
 }
 /**/
@@ -190,7 +190,7 @@ void rotatePin(bool direction, float steps) //moves bender pin
 void duckPin()
 {
 	bcm2835_gpio_write(benderPin, HIGH); 
-	waitSec(0.2);
+	waitmSec(200);
 
 	/***************************************
 	Runs rotatePin() with some constant number of steps to return it to home position, considering wire thickness and direction
