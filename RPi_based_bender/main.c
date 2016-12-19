@@ -24,39 +24,46 @@
 
 // pin assignments
 // Motor pulse and solenoid pins
-const int bendMotorPls = RPI_GPIO_P1_9;
-const int feedMotorPls = RPI_GPIO_P1_11;
-const int benderPin = RPI_GPIO_P1_12;
+const int bendMotorPls = 9; //RPI_GPIO_P1_9;
+const int feedMotorPls = 11; //RPI_GPIO_P1_11;
+const int benderPin = 12; //RPI_GPIO_P1_12;
 
 // AWO pins to allow motor shaft to free spin
-const int bendMotorAWO = RPI_GPIO_P1_3;
-const int feedMotorAWO = RPI_GPIO_P1_5;
+const int bendMotorAWO = 3; //RPI_GPIO_P1_3;
+const int feedMotorAWO = 5; //RPI_GPIO_P1_5;
 
 // Direction pins to select drive direction
-const int bendMotorDir = RPI_GPIO_P1_6;
-const int feedMotorDir = RPI_GPIO_P1_8;
+const int bendMotorDir = 6; //RPI_GPIO_P1_6;
+const int feedMotorDir = 8; //RPI_GPIO_P1_8;
 
 //misc program constants
 const int pulseWidth = 0.1/1000; //in microseconds
 const int pulseDelay = 1/1000; //in microseconds
 
 // Drive directions in english
-bool ccw = true; // counter-clockwise drive direction
-bool cw = false; // clockwise drive direction
-bool curDir = cw; // resets direction before next angle command // pin assignments
+const bool ccw = true; // counter-clockwise drive direction
+const bool cw = false; // clockwise drive direction
+bool curDir = false;
 
-bcm2835_gpio_fsel(bendMotorPls, BCM2835_GPIO_FSEL_OUTP);
-bcm2835_gpio_fsel(feedMotorPls, BCM2835_GPIO_FSEL_OUTP);
-bcm2835_gpio_fsel(benderPin, BCM2835_GPIO_FSEL_OUTP);
+void setup()	
+{
+	curDir = cw; // resets direction before next angle command // pin assignments
 
-bcm2835_gpio_fsel(bendMotorAWO, BCM2835_GPIO_FSEL_OUTP);
-bcm2835_gpio_fsel(feedMotorAWO, BCM2835_GPIO_FSEL_OUTP);
+	bcm2835_init();
 
-bcm2835_gpio_fsel(bendMotorDir, BCM2835_GPIO_FSEL_OUTP);
-bcm2835_gpio_fsel(feedMotorDir, BCM2835_GPIO_FSEL_OUTP);
+	bcm2835_gpio_fsel(bendMotorPls, BCM2835_GPIO_FSEL_OUTP);
+	bcm2835_gpio_fsel(feedMotorPls, BCM2835_GPIO_FSEL_OUTP);
+	bcm2835_gpio_fsel(benderPin, BCM2835_GPIO_FSEL_OUTP);
 
-bcm2835_gpio_fsel(benderPin, BCM2835_GPIO_FSEL_OUTP);
+	bcm2835_gpio_fsel(bendMotorAWO, BCM2835_GPIO_FSEL_OUTP);
+	bcm2835_gpio_fsel(feedMotorAWO, BCM2835_GPIO_FSEL_OUTP);
 
+	bcm2835_gpio_fsel(bendMotorDir, BCM2835_GPIO_FSEL_OUTP);
+	bcm2835_gpio_fsel(feedMotorDir, BCM2835_GPIO_FSEL_OUTP);
+
+	bcm2835_gpio_fsel(benderPin, BCM2835_GPIO_FSEL_OUTP);
+
+}
 
 void waitSec(float seconds)
 {
@@ -68,7 +75,7 @@ void waitSec(float seconds)
 	{
 		diff = clock() - start;
 		msec = diff * 1000 / CLOCKS_PER_SEC;
-		printf("%.3f seconds %.3f milliseconds\n", msec/1000, msec);
+		//printf("%.3f seconds %.3f milliseconds\n", msec/1000, msec);
 	}
 }
 
@@ -87,12 +94,25 @@ void feedWire(float lenght);
 void rotatePin(bool direction, float steps);
 void duckPin();
 
-int main()
+int main(int argc, char **argv)
 {
 	/********
 	Runs bendWire() and feedWire() needed amount of time.
 	Bending function and feeding function should be linked in future to provide lenght/angle interdependence.
 	********/
+	setup();
+	int i = 0;
+	while (i < 1)
+	{
+//		feedWire(50);
+//		wait(0.1/100);
+		bendWire(45);
+		wait(0.1/100);
+		i++;
+	}
+
+	bcm2835_close();
+	return 0;
 }
 
 
@@ -130,6 +150,7 @@ void bendWire(float angle)
 /*WIRE FEEDING FUNCTION*/
 void feedWire(float lenght)
 {
+	int i = 0;
 	if (lenght != 0)
 	{
 		printf("Bending %.2f \n", lenght);
@@ -141,7 +162,7 @@ void feedWire(float lenght)
 
 		bcm2835_gpio_write(feedMotorDir, 1);  //feed motor only moves forward
 
-		for (int i=0; i < steps; i++) //rotate feed motor appropriate number of steps 
+		for (i=0; i < steps; i++) //rotate feed motor appropriate number of steps 
 		{
 			motor_impulse(feedMotorPls);
 		}
@@ -153,11 +174,12 @@ void feedWire(float lenght)
 /*PIN ROTATION FUNCTION*/
 void rotatePin(bool direction, float steps) //moves bender pin
 {
+	int i = 0;
 	printf("Steps %.0f \n", steps);
 
 	bcm2835_gpio_write(bendMotorDir, direction); //moves bender pin back to home position ready for next feed
 	
-	for (int i=0; i < steps; i++)
+	for (i=0; i < steps; i++)
 	{
 		motor_impulse(bendMotorPls);
 		printf("Done %d steps\n", i);
