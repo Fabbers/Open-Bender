@@ -65,34 +65,14 @@ void setup()
 
 }
 
-void waitmSec(float seconds)
-{
-	clock_t start, diff;
-	float msec = 0;
-	start = clock();
-	
-	while (msec < seconds)
-	{
-		diff = clock() - start;
-		msec = diff * 2000 / CLOCKS_PER_SEC;
-//		printf("%.3f seconds %.3f milliseconds %.0f microseconds\n", msec/1000, msec, msec*1000);
-	}
-}
-
-
-void motor_impulse(int motor)
-{
-	bcm2835_gpio_write(motor, HIGH); //moves bender pin back to home position ready for next feed
-	waitmSec(pulseWidth);
-	bcm2835_gpio_write(motor, LOW); //moves bender pin back to home position ready for next feed
-	waitmSec(pulseDelay);
-}
-
+void waitmSec(float mseconds);
+void motorImpulse(int motor);
 
 void bendWire(float angle);
 void feedWire(float lenght);
 void rotatePin(bool direction, float steps);
 void duckPin();
+
 
 int main(int argc, char **argv)
 {
@@ -115,6 +95,30 @@ int main(int argc, char **argv)
 
 	bcm2835_close();
 	return 0;
+}
+
+
+void waitmSec(float mseconds)
+{
+	clock_t start, diff;
+	float msec = 0;
+	start = clock();
+	
+	while (msec < mseconds)
+	{
+		diff = clock() - start;
+		msec = diff * 2000 / CLOCKS_PER_SEC;
+//		printf("%.3f seconds %.3f milliseconds %.0f microseconds\n", msec/1000, msec, msec*1000);
+	}
+}
+
+
+void motorImpulse(int motor)
+{
+	bcm2835_gpio_write(motor, HIGH); //moves bender pin back to home position ready for next feed
+	waitmSec(pulseWidth);
+	bcm2835_gpio_write(motor, LOW); //moves bender pin back to home position ready for next feed
+	waitmSec(pulseDelay);
 }
 
 
