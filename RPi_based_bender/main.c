@@ -191,11 +191,19 @@ void rotatePin(bool direction, float steps) //moves bender pin
 }
 /**/
 
-void duckPin()
+
+void duckPin(bool direction, float wire_thickness)
 {
 	bcm2835_gpio_write(benderPin, HIGH); 
 	waitmSec(200);
+	
+	//readFile() - function which will open file with saved data about last pin location 
+	//checkPinLocationValue() - check if location is home
+	//countSteps() - count steps to practical home pos. if pin was at home pos, move pin only to set it closly to wire considering thickness
+	//if wasn't move it to home considering wire thickness
+	//checkDirection() - check next pin movement direction and move pin accordingly to this
 
+	
 	/***************************************
 	Runs rotatePin() with some constant number of steps to return it to home position, considering wire thickness and direction
 	***************************************/
