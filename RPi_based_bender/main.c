@@ -262,8 +262,6 @@ void pinReturn(float steps_to_home, float wire_thickness, bool direction)
 /*countSteps() - count steps to practical home pos. if pin was at home pos, move pin only to set it closly to wire considering thickness
 if wasn't move it to home considering wire thickness*/
 /*checkDirection() - check next pin movement direction and move pin accordingly to this*/
-
-
-/***************************************
+/*
 Runs rotatePin() with some constant number of steps to return it to home position, considering wire thickness and direction
-***************************************/
+*/
