@@ -3,6 +3,8 @@
 #include <stdbool.h>
 #include <time.h>
 #include <stdlib.h>
+#include <string.h>
+
 
 #define FEED_MOTOR_STEPS_PER_REVOLUTION 4000 
 #define FEED_MOTOR_SHAFT_DIAMETER 30.4
@@ -44,6 +46,12 @@ const int pulseDelay = 1; //1000 microseconds
 const bool ccw = true; // counter-clockwise drive direction
 const bool cw = false; // clockwise drive direction
 bool curDir = false;
+bool coldStart = true;
+
+const float homePosition = 0;
+float lastPinPosition = 0;
+
+FILE *file_handler;
 
 void setup()	
 {
@@ -71,8 +79,9 @@ void motorImpulse(int motor);
 void bendWire(float angle);
 void feedWire(float lenght);
 void rotatePin(bool direction, float steps);
+void pinReturn(float steps_to_home, float wire_thickness, bool direction);
 void duckPin();
-
+int readCurPos();
 
 int main(int argc, char **argv)
 {
@@ -144,6 +153,7 @@ void bendWire(float angle)
 		steps = angle * BEND_MOTOR_STEPS_PER_DEGREE;
 
 		rotatePin(dir, steps); //move bender pin
+		coldStart = false; //set flag that bending started and even one bending move was done
 		waitmSec(100);
 		rotatePin(back, steps); //return bender pin
 	}
@@ -188,26 +198,72 @@ void rotatePin(bool direction, float steps) //moves bender pin
 		motor_impulse(bendMotorPls);
 //		printf("Bended to %.2f angle\n", i/BEND_MOTOR_STEPS_PER_DEGREE);
 	}
+	
+	file_handler = fopen("position.txt", "w+");
+	fputc(i, file_handler); //put last step to file
+	fputc(i/BEND_MOTOR_STEPS_PER_DEGREE, file_handler); //put last angle to file
+	fclose(file_handler);
 }
 /**/
 
 
-void duckPin(bool direction, float wire_thickness)
+// void duckPin(bool direction, float wire_thickness)
+// {
+// 	bcm2835_gpio_write(benderPin, HIGH);
+// 	waitmSec(200);
+// 	bcm2835_gpio_write(benderPin, LOW);
+// 	curDir = !curDir;    //direction reversed for next duck
+// }
+
+
+/*Reading position of bending pin*/
+int readCurPos()
 {
-	bcm2835_gpio_write(benderPin, HIGH); 
-	waitmSec(200);
-	
-	//readFile() - function which will open file with saved data about last pin location 
-	//checkPinLocationValue() - check if location is home
-	//countSteps() - count steps to practical home pos. if pin was at home pos, move pin only to set it closly to wire considering thickness
-	//if wasn't move it to home considering wire thickness
-	//checkDirection() - check next pin movement direction and move pin accordingly to this
-
-	
-	/***************************************
-	Runs rotatePin() with some constant number of steps to return it to home position, considering wire thickness and direction
-	***************************************/
-
- 	bcm2835_gpio_write(benderPin, LOW);  //pin down move under wire
-	curDir = !curDir;    //direction reversed for next duck
+	float data[2];
+	memset(data, 0x00, sizeof(data));
+	float steps_to_home = 0;
+	if (coldStart) //check if system just started
+	{
+		file_handler = fopen("position.txt", "r");
+    	fgets(data, 2, (FILE*)file_handler); // get data from file
+		steps_to_home = data[0]; //first element in array have to be steps
+		fclose(file_handler);
+	}
+	else
+	{
+		if (lastPinPosition  != homePosition)
+			steps_to_home = lastPinPosition - homePosition;
+		else 
+			steps_to_home = homePosition;
+	}
+	return steps_to_home;
 }
+/**/
+
+/*Pin returning function
+Homing routine*/
+void pinReturn(float steps_to_home, float wire_thickness, bool direction)
+{
+	float steps = 0;
+	steps = steps_to_home + wire_thickness/2.0;
+	bcm2835_gpio_write(benderPin, HIGH);
+
+	if (direction == ccw)
+		rotatePin(cw, steps);
+	else if (direction == cw)
+		rotatePin(cww, steps);
+	
+	bcm2835_gpio_write(benderPin, LOW);
+}
+/**/
+	
+/*readFile() - function which will open file with saved data about last pin location */
+/*checkPinLocationValue() - check if location is home*/
+/*countSteps() - count steps to practical home pos. if pin was at home pos, move pin only to set it closly to wire considering thickness
+if wasn't move it to home considering wire thickness*/
+/*checkDirection() - check next pin movement direction and move pin accordingly to this*/
+
+
+/***************************************
+Runs rotatePin() with some constant number of steps to return it to home position, considering wire thickness and direction
+***************************************/
