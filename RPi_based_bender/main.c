@@ -139,8 +139,8 @@ void bendWire(float angle)
 	if (angle != 0)
 	{
 		printf("Bending %.2f \n", angle);
-		bool dir=cw;
-		bool back=ccw;
+		bool dir = cw;
+		bool back = ccw;
 		
 		if (angle < 0)
 		{
@@ -155,7 +155,9 @@ void bendWire(float angle)
 		rotatePin(dir, steps); //move bender pin
 		coldStart = false; //set flag that bending started and even one bending move was done
 		waitmSec(100);
-		rotatePin(back, steps); //return bender pin
+		//rotatePin(back, steps); //return bender pin
+		int steps_from_file = readCurPos();
+		pinReturn(steps_from_file, WIRE_THICKNESS, back);
 	}
 }
 /**/
@@ -227,6 +229,7 @@ int readCurPos()
 		file_handler = fopen("position.txt", "r");
     	fgets(data, 2, (FILE*)file_handler); // get data from file
 		steps_to_home = data[0]; //first element in array have to be steps
+		printf("COLD START\nData from file, steps to home: %d, angle to home: %d\n", steps_to_home, data[1])
 		fclose(file_handler);
 	}
 	else
@@ -235,6 +238,7 @@ int readCurPos()
 			steps_to_home = lastPinPosition - homePosition;
 		else 
 			steps_to_home = homePosition;
+		printf("MACHINE IS RUNNING FOR SOME TIME\nCalculated data, steps to home: %.2f, angle to home: %.2f\n", steps_to_home, steps_to_home/BEND_MOTOR_STEPS_PER_DEGREE)
 	}
 	return steps_to_home;
 }
@@ -249,9 +253,15 @@ void pinReturn(float steps_to_home, float wire_thickness, bool direction)
 	bcm2835_gpio_write(benderPin, HIGH);
 
 	if (direction == ccw)
+	{
+		printf("Pin is turning in CCW direction");
 		rotatePin(cw, steps);
+	}
 	else if (direction == cw)
+	{
+		printf("Pin is turning in CW direction");
 		rotatePin(cww, steps);
+	}
 	
 	bcm2835_gpio_write(benderPin, LOW);
 }
