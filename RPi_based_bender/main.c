@@ -90,10 +90,11 @@ int main(int argc, char **argv)
 	Bending function and feeding function should be linked in future to provide lenght/angle interdependence.
 	********/
 	setup();
-
+	//int steps_to_home = readCurPos();
+	pinReturn(2000, WIRE_THICKNESS, curDir);
 	int i = 0;
 
-	while (i < 1)
+	while (i < 5)
 	{
 		feedWire(50);
 		waitmSec(1);
@@ -138,7 +139,7 @@ void bendWire(float angle)
 {
 	if (angle != 0)
 	{
-		printf("Bending %.2f \n", angle);
+		printf("Bending to %.2f degrees \n", angle);
 		bool dir = cw;
 		bool back = ccw;
 		
@@ -156,8 +157,8 @@ void bendWire(float angle)
 		coldStart = false; //set flag that bending started and even one bending move was done
 		waitmSec(100);
 		//rotatePin(back, steps); //return bender pin
-		int steps_from_file = readCurPos();
-		pinReturn(steps_from_file, WIRE_THICKNESS, back);
+		//int steps_from_file = readCurPos();
+		pinReturn(steps, WIRE_THICKNESS, back);
 	}
 }
 /**/
@@ -169,18 +170,18 @@ void feedWire(float lenght)
 	int i = 0;
 	if (lenght != 0)
 	{
-		printf("Feeding %.2f \n", lenght);
+		printf("Feeding %.2f mm\n", lenght);
 
 		float steps = 0;
 		steps = lenght * FEED_MOTOR_STEPS_PER_MILIMETER;
 		
-		printf("Steps %.0f \n", steps);
+		printf("Steps %.2f \n", steps);
 
 		bcm2835_gpio_write(feedMotorDir, 1);  //feed motor only moves forward
 
 		for (i=0; i < steps; i++) //rotate feed motor appropriate number of steps 
 		{
-			motor_impulse(feedMotorPls);
+			motorImpulse(feedMotorPls);
 		}
 	}
 }
@@ -191,20 +192,25 @@ void feedWire(float lenght)
 void rotatePin(bool direction, float steps) //moves bender pin
 {
 	int i = 0;
-	printf("Steps %.0f \n", steps);
+	printf("Steps %.2f \n", steps);
 
 	bcm2835_gpio_write(bendMotorDir, direction); //moves bender pin back to home position ready for next feed
 	
 	for (i=0; i < steps; i++)
 	{
-		motor_impulse(bendMotorPls);
+		motorImpulse(bendMotorPls);
 //		printf("Bended to %.2f angle\n", i/BEND_MOTOR_STEPS_PER_DEGREE);
 	}
-	
+/*	char lstep[2];
+	char langle[2];
+	memset(lstep, "\0", sizeof(lstep));
+	memset(langle, "\0", sizeof(langle));
+	sprintf(lstep, sizeof(i), "%f", i);
+	sprintf(langle, sizeof(i), "%f", i/BEND_MOTOR_STEPS_PER_DEGREE);
 	file_handler = fopen("position.txt", "w+");
-	fputc(i, file_handler); //put last step to file
-	fputc(i/BEND_MOTOR_STEPS_PER_DEGREE, file_handler); //put last angle to file
-	fclose(file_handler);
+	fputc(lstep, file_handler); //put last step to file
+	fputc(langle, file_handler); //put last angle to file
+	fclose(file_handler);*/
 }
 /**/
 
@@ -221,15 +227,15 @@ void rotatePin(bool direction, float steps) //moves bender pin
 /*Reading position of bending pin*/
 int readCurPos()
 {
-	float data[2];
-	memset(data, 0x00, sizeof(data));
+	char data[2];
+	memset(data, "\0", sizeof(data));
 	float steps_to_home = 0;
 	if (coldStart) //check if system just started
 	{
 		file_handler = fopen("position.txt", "r");
-    	fgets(data, 2, (FILE*)file_handler); // get data from file
-		steps_to_home = data[0]; //first element in array have to be steps
-		printf("COLD START\nData from file, steps to home: %d, angle to home: %d\n", steps_to_home, data[1])
+    		fgets(data, 2, (FILE*)file_handler); // get data from file
+		steps_to_home = atof(data[0]); //first element in array have to be steps
+		printf("COLD START\nData from file, steps to home: %f, angle to home: %f\n", steps_to_home, atof(data[1]));
 		fclose(file_handler);
 	}
 	else
@@ -238,7 +244,7 @@ int readCurPos()
 			steps_to_home = lastPinPosition - homePosition;
 		else 
 			steps_to_home = homePosition;
-		printf("MACHINE IS RUNNING FOR SOME TIME\nCalculated data, steps to home: %.2f, angle to home: %.2f\n", steps_to_home, steps_to_home/BEND_MOTOR_STEPS_PER_DEGREE)
+		printf("MACHINE IS RUNNING FOR SOME TIME\nCalculated data, steps to home: %.2f, angle to home: %.2f\n", steps_to_home, steps_to_home/BEND_MOTOR_STEPS_PER_DEGREE);
 	}
 	return steps_to_home;
 }
@@ -251,19 +257,21 @@ void pinReturn(float steps_to_home, float wire_thickness, bool direction)
 	float steps = 0;
 	steps = steps_to_home + wire_thickness/2.0;
 	bcm2835_gpio_write(benderPin, HIGH);
+	printf("Solenoid is hidden");
 
 	if (direction == ccw)
 	{
-		printf("Pin is turning in CCW direction");
+		printf("Pin is turning in CCW direction\n");
 		rotatePin(cw, steps);
 	}
 	else if (direction == cw)
 	{
-		printf("Pin is turning in CW direction");
-		rotatePin(cww, steps);
+		printf("Pin is turning in CW direction\n");
+		rotatePin(ccw, steps);
 	}
 	
 	bcm2835_gpio_write(benderPin, LOW);
+	printf("Solenoid is in up position");
 }
 /**/
 	
