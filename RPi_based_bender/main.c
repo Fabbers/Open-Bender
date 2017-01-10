@@ -267,9 +267,9 @@ passes parameters:
 void pinReturn(float steps_to_home, float wire_thickness, bool direction)
 {
 	float steps = 0;
-	steps = steps_to_home + wire_thickness/2.0;
+	steps = steps_to_home + BEND_MOTOR_STEPS_PER_DEGREE *(wire_thickness/2.0);
 	bcm2835_gpio_write(benderPin, HIGH);
-	printf("Solenoid is hidden");
+	printf("Solenoid is hidden\n");
 
 	if (direction == ccw)
 	{
@@ -283,7 +283,7 @@ void pinReturn(float steps_to_home, float wire_thickness, bool direction)
 	}
 	
 	bcm2835_gpio_write(benderPin, LOW);
-	printf("Solenoid is in up position");
+	printf("Solenoid is in up position\n");
 }
 /**/
 
@@ -304,7 +304,7 @@ void homePosition()
 	}
 	printf("Maximum limit switch reached\nTotal amount of steps on scale: %.2f\n", steps_count);
 
-	middle_position = steps_count/2;
+	middle_position = steps_count/2.0;
 	printf("Home position should be on step %.2f\n", middle_position);
 	rotatePin(cw, middle_position);
 }
