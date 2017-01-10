@@ -38,6 +38,10 @@ const int feedMotorAWO = 5; //RPI_GPIO_P1_5;
 const int bendMotorDir = 6; //RPI_GPIO_P1_6;
 const int feedMotorDir = 8; //RPI_GPIO_P1_8;
 
+//Limit Switches 
+const int minSwitch = 23 //RPI_GPIO_P1_23;
+const int maxSwitch = 24 //RPI_GPIO_P1_24;
+
 //misc program constants
 const int pulseWidth = 0.1; //100 microseconds
 const int pulseDelay = 1; //1000 microseconds
@@ -71,6 +75,9 @@ void setup()
 
 	bcm2835_gpio_fsel(benderPin, BCM2835_GPIO_FSEL_OUTP);
 
+	bcm2835_gpio_fsel(minSwitch, BCM2835_GPIO_FSEL_INP);
+	bcm2835_gpio_fsel(maxSwitch, BCM2835_GPIO_FSEL_INP);
+
 }
 
 void waitmSec(float mseconds);
@@ -80,6 +87,7 @@ void bendWire(float angle);
 void feedWire(float lenght);
 void rotatePin(bool direction, float steps);
 void pinReturn(float steps_to_home, float wire_thickness, bool direction);
+void homingRoutine();
 void duckPin();
 int readCurPos();
 
@@ -251,7 +259,11 @@ int readCurPos()
 /**/
 
 /*Pin returning function
-Homing routine*/
+passes parameters:
+1. float value of steps amount to reach home position
+2. float value of wire diameter
+3. boolean value of in what direction motor should move
+*/
 void pinReturn(float steps_to_home, float wire_thickness, bool direction)
 {
 	float steps = 0;
@@ -274,6 +286,28 @@ void pinReturn(float steps_to_home, float wire_thickness, bool direction)
 	printf("Solenoid is in up position");
 }
 /**/
+
+/*Homing routine function*/
+void homePosition()
+{
+	float steps_count = 0;
+	float middle_position = 0;
+	while (minSwitch == HIGH)
+		rotatePin(cw, 1);
+	
+	printf("Minimum limit switch reached\n");
+
+	while (maxSwitch == HIGH)
+	{
+		rotatePin(ccw, 1);
+		steps_count++;
+	}
+	printf("Maximum limit switch reached\nTotal amount of steps on scale: %.2f\n", steps_count);
+
+	middle_position = steps_count/2;
+	printf("Home position should be on step %.2f\n", middle_position);
+	rotatePin(cw, middle_position);
+}
 	
 /*readFile() - function which will open file with saved data about last pin location */
 /*checkPinLocationValue() - check if location is home*/
