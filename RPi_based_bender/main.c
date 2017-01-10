@@ -38,9 +38,9 @@ const int feedMotorAWO = 5; //RPI_GPIO_P1_5;
 const int bendMotorDir = 6; //RPI_GPIO_P1_6;
 const int feedMotorDir = 8; //RPI_GPIO_P1_8;
 
-//Limit Switches 
-const int minSwitch = 23 //RPI_GPIO_P1_23;
-const int maxSwitch = 24 //RPI_GPIO_P1_24;
+//Limit Switches
+const int minSwitch = 23; //RPI_GPIO_P1_23;
+const int maxSwitch = 24; //RPI_GPIO_P1_24;
 
 //misc program constants
 const int pulseWidth = 0.1; //100 microseconds
@@ -57,7 +57,7 @@ float lastPinPosition = 0;
 
 FILE *file_handler;
 
-void setup()	
+void setup()
 {
 	curDir = cw; // resets direction before next angle command // pin assignments
 
@@ -75,8 +75,10 @@ void setup()
 
 	bcm2835_gpio_fsel(benderPin, BCM2835_GPIO_FSEL_OUTP);
 
-	bcm2835_gpio_fsel(minSwitch, BCM2835_GPIO_FSEL_INP);
-	bcm2835_gpio_fsel(maxSwitch, BCM2835_GPIO_FSEL_INP);
+	bcm2835_gpio_fsel(minSwitch, BCM2835_GPIO_FSEL_INPT);
+	bcm2835_gpio_fsel(maxSwitch, BCM2835_GPIO_FSEL_INPT);
+	bcm2835_gpio_set_pud(minSwitch, BCM2835_GPIO_PUD_UP);
+	bcm2835_gpio_set_pud(maxSwitch, BCM2835_GPIO_PUD_UP);
 
 }
 
@@ -98,11 +100,12 @@ int main(int argc, char **argv)
 	Bending function and feeding function should be linked in future to provide lenght/angle interdependence.
 	********/
 	setup();
+	homingRoutine();
 	//int steps_to_home = readCurPos();
-	pinReturn(2000, WIRE_THICKNESS, curDir);
+	//pinReturn(2000, WIRE_THICKNESS, curDir);
 	int i = 0;
 
-	while (i < 5)
+	/*while (i < 5)
 	{
 		feedWire(50);
 		waitmSec(1);
@@ -110,6 +113,7 @@ int main(int argc, char **argv)
 		waitmSec(1);
 		i++;
 	}
+	*/
 
 	bcm2835_close();
 	return 0;
@@ -121,7 +125,7 @@ void waitmSec(float mseconds)
 	clock_t start, diff;
 	float msec = 0;
 	start = clock();
-	
+
 	while (msec < mseconds)
 	{
 		diff = clock() - start;
@@ -150,7 +154,7 @@ void bendWire(float angle)
 		printf("Bending to %.2f degrees \n", angle);
 		bool dir = cw;
 		bool back = ccw;
-		
+
 		if (angle < 0)
 		{
 			dir = ccw;
@@ -160,7 +164,7 @@ void bendWire(float angle)
 		float steps = 0;
 		angle = abs(angle);
 		steps = angle * BEND_MOTOR_STEPS_PER_DEGREE;
-
+                printf("Steps %.2f \n", steps);
 		rotatePin(dir, steps); //move bender pin
 		coldStart = false; //set flag that bending started and even one bending move was done
 		waitmSec(100);
@@ -182,7 +186,7 @@ void feedWire(float lenght)
 
 		float steps = 0;
 		steps = lenght * FEED_MOTOR_STEPS_PER_MILIMETER;
-		
+
 		printf("Steps %.2f \n", steps);
 
 		bcm2835_gpio_write(feedMotorDir, 1);  //feed motor only moves forward
@@ -200,10 +204,9 @@ void feedWire(float lenght)
 void rotatePin(bool direction, float steps) //moves bender pin
 {
 	int i = 0;
-	printf("Steps %.2f \n", steps);
 
 	bcm2835_gpio_write(bendMotorDir, direction); //moves bender pin back to home position ready for next feed
-	
+
 	for (i=0; i < steps; i++)
 	{
 		motorImpulse(bendMotorPls);
@@ -250,7 +253,7 @@ int readCurPos()
 	{
 		if (lastPinPosition  != homePosition)
 			steps_to_home = lastPinPosition - homePosition;
-		else 
+		else
 			steps_to_home = homePosition;
 		printf("MACHINE IS RUNNING FOR SOME TIME\nCalculated data, steps to home: %.2f, angle to home: %.2f\n", steps_to_home, steps_to_home/BEND_MOTOR_STEPS_PER_DEGREE);
 	}
@@ -281,23 +284,23 @@ void pinReturn(float steps_to_home, float wire_thickness, bool direction)
 		printf("Pin is turning in CW direction\n");
 		rotatePin(ccw, steps);
 	}
-	
+
 	bcm2835_gpio_write(benderPin, LOW);
 	printf("Solenoid is in up position\n");
 }
 /**/
 
 /*Homing routine function*/
-void homePosition()
+void homingRoutine()
 {
 	float steps_count = 0;
 	float middle_position = 0;
-	while (minSwitch == HIGH)
+	while (bcm2835_gpio_lev(minSwitch) != 0)
 		rotatePin(cw, 1);
-	
+
 	printf("Minimum limit switch reached\n");
 
-	while (maxSwitch == HIGH)
+	while (bcm2835_gpio_lev(maxSwitch) != 0)
 	{
 		rotatePin(ccw, 1);
 		steps_count++;
@@ -308,7 +311,7 @@ void homePosition()
 	printf("Home position should be on step %.2f\n", middle_position);
 	rotatePin(cw, middle_position);
 }
-	
+
 /*readFile() - function which will open file with saved data about last pin location */
 /*checkPinLocationValue() - check if location is home*/
 /*countSteps() - count steps to practical home pos. if pin was at home pos, move pin only to set it closly to wire considering thickness
