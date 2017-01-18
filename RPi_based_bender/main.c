@@ -9,6 +9,9 @@ int main(int argc, char **argv)
 	//homingRoutine();
 	int i = 0;
 	waitmSec(500);
+	json_value* content = getFileContent(argv[1]);
+	printf("%s\n", content);
+	getOffset(content);
 	//motorImpulse(bendMotorPls);
 	/*while (i < 5)
 	{
