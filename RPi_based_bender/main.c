@@ -10,8 +10,8 @@ int main(int argc, char **argv)
 	int i = 0;
 	waitmSec(500);
 	json_value* content = getFileContent(argv[1]);
-	printf("%s\n", content);
-	getOffset(content);
+	printf("%d\n", content);
+	//getOffset(content);
 	//motorImpulse(bendMotorPls);
 	/*while (i < 5)
 	{
