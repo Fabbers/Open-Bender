@@ -1,15 +1,13 @@
 from init_file import *
 
+setup()
+#wait(5)
+homingRoutine()
+for i in range(2):
+	feedWire(50)
+	wait(0.001)
+	bendWire(45)
+	wait(0.001)	
+	
 
-def main():
-	wait(500)
-	homingRoutine()
-	while i < 2:
-		feedWire(50)
-		wait(1)
-		bendWire(45)
-		wait(1)
-		i += 1		
-
-if __name__ == "main":
-	main()
+wait(5)
