@@ -1,5 +1,4 @@
-import RPi.GPIO as GPIO
-import json
+#import RPi.GPIO as GPIO
 import time
 
 FEED_MOTOR_STEPS_PER_REVOLUTION = 4000 
