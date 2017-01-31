@@ -44,7 +44,8 @@ pulseDelay = 0.001 #1000 microseconds
 # Drive directions in english
 ccw = True # counter-clockwise drive direction
 cw = False # clockwise drive direction
-curDir = False
+curDir = cw; # resets direction before next angle command, pin assignments
+
 coldStart = True
 
 homePosition = 0
@@ -52,8 +53,6 @@ lastPinPosition = 0
 
 
 def setup():
-	curDir = cw; # resets direction before next angle command, pin assignments
-
 	GPIO.setmode(GPIO.BCM)
 
 	GPIO.setup(bendMotorPls, GPIO.OUT) 
@@ -69,6 +68,7 @@ def setup():
 	GPIO.setup(minSwitch, GPIO.IN, pull_up_down=GPIO.PUD_UP) 
 	GPIO.setup(maxSwitch, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
+#Alternative timer
 def wait(mseconds):
 	start_time = time.time()
 	#mseconds = mseconds/1000
@@ -78,12 +78,14 @@ def wait(mseconds):
 		if float(current_time - start_time) >= mseconds:
 			break
 
+#Makes one motor impulse of specified motor as parameter
 def motorImpulse(motor):
 	GPIO.output(motor, GPIO.HIGH)
 	wait(pulseWidth) 
 	GPIO.output(motor, GPIO.LOW)
 	wait(pulseDelay)
 
+#Rotates bending to specified amount of steps in specified direction
 def rotatePin(direction, steps):
 	GPIO.output(bendMotorDir, direction)
 
@@ -91,6 +93,7 @@ def rotatePin(direction, steps):
 		motorImpulse(bendMotorPls)
 		# print "Bended to {} angle".format(i/BEND_MOTOR_STEPS_PER_DEGREE)
 
+#Bends wire for specified angle, could be negative
 def bendWire(angle):
 	if angle != 0:
 		print "Bending to {} degrees".format(angle)
@@ -107,16 +110,18 @@ def bendWire(angle):
 		print "Steps {}".format(steps)
 		rotatePin(direction, steps)
 
-def feedWire(lenght):
-	if lenght != 0:
-		print "Feeding {}".format(lenght)
-		steps = lenght * FEED_MOTOR_STEPS_PER_MILIMETER
+#Feeds wire for specified length in mm
+def feedWire(length):
+	if length != 0:
+		print "Feeding {}".format(length)
+		steps = length * FEED_MOTOR_STEPS_PER_MILIMETER
 		print "Steps {}".format(steps)
 		GPIO.output(feedMotorDir, 1)
 
 		for i in range(int(steps)):
 			motorImpulse(feedMotorPls)
 
+#Returns bending pin to specified as 1st param. amount of steps to home pos., considers wire diameter and direction
 def pinReturn(steps_to_home, wire_thickness, direction):
 	steps = steps_to_home + BEND_MOTOR_STEPS_PER_DEGREE * (wire_thickness/2.0)
 	GPIO.output(benderPin, HIGH)
@@ -132,6 +137,7 @@ def pinReturn(steps_to_home, wire_thickness, direction):
 	GPIO.output(benderPin, LOW)
 	print "Solenoid is in up position"
 
+#Homing routine with limiting switches
 def homingRoutine():
 	steps_count = 0
 
@@ -148,5 +154,31 @@ def homingRoutine():
 	middle_position = steps_count/2.0
 	print "Home position should be on step {}".format(middle_position)
 	rotatePin(cw, middle_position)
+
+#Temporar cap for reading commands from Web App
+def readCommandsFromUI():
+	pass
+
+#Creates CSV table with REAL and THEORETICAL angles
+#1st column - theoretical, 2nd - real
+def anglesTableCreation(theoretical_angle):
+	bendWire(theoretical_angle)
+	steps_count = 0
+
+	while not readCommandsFromUI() == "reached home":
+		if readCommandsFromUI() == "make 1 step"
+			bendWire(-1*(theoretical_angle/theoretical_angle))
+			steps_count += 1
+
+	real_angle = steps_count/BEND_MOTOR_STEPS_PER_DEGREE
+
+	with open("manual_tuning.csv") as csvfile:
+		file = csv.writer(csvfile, delimiter = ',')
+
+		file.writerow([theoretical_angle, real_angle])
+		# for content in file:
+		# 	carrier = content[0]
+		# 	weekday = content[1]
+
 
 
