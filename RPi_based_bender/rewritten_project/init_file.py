@@ -1,5 +1,6 @@
 #import RPi.GPIO as GPIO
 import time
+import csv
 
 FEED_MOTOR_STEPS_PER_REVOLUTION = 4000 
 FEED_MOTOR_SHAFT_DIAMETER = 30.4
@@ -172,13 +173,50 @@ def anglesTableCreation(theoretical_angle):
 
 	real_angle = steps_count/BEND_MOTOR_STEPS_PER_DEGREE
 
-	with open("manual_tuning.csv") as csvfile:
-		file = csv.writer(csvfile, delimiter = ',')
+	# parentAngle = 0
+	csvfile = open("manual_tuning.csv", "rb")
+	file = csv.reader(csvfile, delimiter = ',')
 
-		file.writerow([theoretical_angle, real_angle])
-		# for content in file:
-		# 	carrier = content[0]
-		# 	weekday = content[1]
+	counter = 0
+	for content in file:
+		counter += 1
 
+	# rangle = 0
+	# tangle = 0
+	rangles_list = []
+	tangles_list = []
+	if counter > 1:
+		for content in file:
+			tangle = content[0]
+			rangle = content[1]
+			rangles_list.append(rangle)
+			tangles_list.append(tangle)
+
+		rangles_list.sort()
+		tangles_list.sort()
+
+		largestParentAngle = float(rangles_list[-1])
+		largestTAngle = float(tangles_list[-1])
+		
+		rangle_in_tangle = largestParentAngle/largestTAngle
+
+		#there will be CHILD angles filling procedure with closing current file and changing mode for opening from 'rb' to 'a'. 
+		#PARENT angles will have in CSV file 3rd column with some marker
+
+		print "Theoretical angle from file: {}\nReal angle from file: {}".format(tangle, rangle)
+
+	else:
+		csvfile.close()
+		csvfile = open("manual_tuning.csv", "a")
+
+		fwriter = csv.writer(csvfile, delimiter = ",")
+		fwriter.writerow([theoretical_angle, real_angle, "PARENT"])
+
+		rangle_in_tangle = real_angle/theoretical_angle
+		#there will be CHILD angles filling procedure. procedure runs until we meat lower 'PARENT' marker
+
+
+
+		
 
 
