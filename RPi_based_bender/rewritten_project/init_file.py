@@ -161,7 +161,7 @@ def readCommandsFromUI():
 	pass
 
 #Creates CSV table with REAL and THEORETICAL angles
-#1st column - theoretical, 2nd - real
+#1st column - theoretical, 2nd - real, 3-rd - angle's type marker
 def anglesTableCreation(theoretical_angle):
 	bendWire(theoretical_angle)
 	steps_count = 0
@@ -177,6 +177,7 @@ def anglesTableCreation(theoretical_angle):
 	csvfile = open("manual_tuning.csv", "rb")
 	file = csv.reader(csvfile, delimiter = ',')
 
+	#counting length of CSV file 
 	counter = 0
 	for content in file:
 		counter += 1
@@ -185,6 +186,15 @@ def anglesTableCreation(theoretical_angle):
 	# tangle = 0
 	rangles_list = []
 	tangles_list = []
+
+	#real angles coefficient
+	rangle_in_tangle = 0
+
+	#largest theoretical and real angle
+	largestParentAngle = 0
+	largestTAngle = 0
+
+	#check if CSV file is empty
 	if counter > 1:
 		for content in file:
 			tangle = content[0]
@@ -198,25 +208,20 @@ def anglesTableCreation(theoretical_angle):
 		largestParentAngle = float(rangles_list[-1])
 		largestTAngle = float(tangles_list[-1])
 		
-		rangle_in_tangle = largestParentAngle/largestTAngle
-
-		#there will be CHILD angles filling procedure with closing current file and changing mode for opening from 'rb' to 'a'. 
-		#PARENT angles will have in CSV file 3rd column with some marker
-
 		print "Theoretical angle from file: {}\nReal angle from file: {}".format(tangle, rangle)
 
-	else:
-		csvfile.close()
-		csvfile = open("manual_tuning.csv", "a")
+	csvfile.close()
+	csvfile = open("manual_tuning.csv", "a")
 
-		fwriter = csv.writer(csvfile, delimiter = ",")
-		fwriter.writerow([theoretical_angle, real_angle, "PARENT"])
+	fwriter = csv.writer(csvfile, delimiter = ",")
 
-		rangle_in_tangle = real_angle/theoretical_angle
-		#there will be CHILD angles filling procedure. procedure runs until we meat lower 'PARENT' marker
+	rangle_in_tangle = real_angle/theoretical_angle
+	
+	#CHILD angles filling procedure. procedure runs until we meet meet largest element in theoretical angles list, 
+	#what means that it is 'PARENT' angle.
+	for angle in range(largestTAngle, theoretical_angle):
+		fwriter.writerow([angle, angle*rangle_in_tangle, "CHILD"])		
 
-
-
-		
-
+	#appending last element as 'PARENT'
+	fwriter.writerow([theoretical_angle, real_angle, "PARENT"])
 
