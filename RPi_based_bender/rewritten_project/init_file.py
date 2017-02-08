@@ -96,18 +96,30 @@ def rotatePin(direction, steps):
 
 #Bends wire for specified angle, could be negative
 def bendWire(angle):
-	if angle != 0:
-		print "Bending to {} degrees".format(angle)
+	angles_table = open("manual_tuning.csv", "rb")
+	file = csv.reader(angles_table, delimiter = ',')
+
+	#dictionary to store all angles from file
+	angles_dict = {}
+	for angle in file:
+		theoretical_angle = int(angle[0])
+		real_angle = int(angle[1])
+		angles_dict[theoretical_angle] = real_angle
+
+	bending_angle = angles_dict[angle]
+
+	if bending_angle != 0:
+		print "Bending to {} degrees".format(bending_angle)
 		direction = cw
 		reversedir = ccw
 
-		if angle < 0:
+		if bending_angle < 0:
 			direction = ccw
 			reversedir = cw
 
 		steps = 0
-		angle = abs(angle)
-		steps = angle * BEND_MOTOR_STEPS_PER_DEGREE
+		bending_angle = abs(bending_angle)
+		steps = bending_angle * BEND_MOTOR_STEPS_PER_DEGREE
 		print "Steps {}".format(steps)
 		rotatePin(direction, steps)
 
@@ -168,7 +180,11 @@ def anglesTableCreation(theoretical_angle):
 
 	while not readCommandsFromUI() == "reached home":
 		if readCommandsFromUI() == "make 1 step"
-			bendWire(-1*(theoretical_angle/theoretical_angle))
+			if theoretical_angle > 0:
+				bendWire(1)
+			else if theoretical_angle < 0:
+				bendWire(-1)
+			else: break
 			steps_count += 1
 
 	real_angle = steps_count/BEND_MOTOR_STEPS_PER_DEGREE
@@ -219,9 +235,15 @@ def anglesTableCreation(theoretical_angle):
 	
 	#CHILD angles filling procedure. procedure runs until we meet meet largest element in theoretical angles list, 
 	#what means that it is 'PARENT' angle.
-	for angle in range(largestTAngle, theoretical_angle):
-		fwriter.writerow([angle, angle*rangle_in_tangle, "CHILD"])		
+	for angle in range(largestTAngle, abs(theoretical_angle)):
+		if theoretical_angle < 0:
+			angle *= -1
+		fwriter.writerow([angle, angle*rangle_in_tangle, "CHILD"])
 
 	#appending last element as 'PARENT'
-	fwriter.writerow([theoretical_angle, real_angle, "PARENT"])
+	if theoretical_angle < 0:
+			fwriter.writerow([-theoretical_angle, -real_angle, "PARENT"])
+	else:
+		fwriter.writerow([theoretical_angle, real_angle, "PARENT"])
 
+	csvfile.close()
