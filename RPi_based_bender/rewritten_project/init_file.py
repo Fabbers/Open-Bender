@@ -69,6 +69,7 @@ def setup():
 	GPIO.setup(minSwitch, GPIO.IN, pull_up_down=GPIO.PUD_UP) 
 	GPIO.setup(maxSwitch, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
+
 #Alternative timer
 def wait(mseconds):
 	start_time = time.time()
@@ -79,12 +80,14 @@ def wait(mseconds):
 		if float(current_time - start_time) >= mseconds:
 			break
 
+
 #Makes one motor impulse of specified motor as parameter
 def motorImpulse(motor):
 	GPIO.output(motor, GPIO.HIGH)
 	wait(pulseWidth) 
 	GPIO.output(motor, GPIO.LOW)
 	wait(pulseDelay)
+
 
 #Rotates bending to specified amount of steps in specified direction
 def rotatePin(direction, steps):
@@ -94,19 +97,23 @@ def rotatePin(direction, steps):
 		motorImpulse(bendMotorPls)
 		# print "Bended to {} angle".format(i/BEND_MOTOR_STEPS_PER_DEGREE)
 
+
 #Bends wire for specified angle, could be negative
 def bendWire(angle):
 	angles_table = open("manual_tuning.csv", "rb")
 	file = csv.reader(angles_table, delimiter = ',')
 
 	#dictionary to store all angles from file
-	angles_dict = {}
-	for angle in file:
-		theoretical_angle = int(angle[0])
-		real_angle = int(angle[1])
-		angles_dict[theoretical_angle] = real_angle
+	if file == True:
+		angles_dict = {}
+		for angle in file:
+			theoretical_angle = int(angle[0])
+			real_angle = int(angle[1])
+			angles_dict[theoretical_angle] = real_angle
 
-	bending_angle = angles_dict[angle]
+		bending_angle = angles_dict[angle]
+	else:
+		bending_angle = angle
 
 	if bending_angle != 0:
 		print "Bending to {} degrees".format(bending_angle)
@@ -123,6 +130,7 @@ def bendWire(angle):
 		print "Steps {}".format(steps)
 		rotatePin(direction, steps)
 
+
 #Feeds wire for specified length in mm
 def feedWire(length):
 	if length != 0:
@@ -133,6 +141,7 @@ def feedWire(length):
 
 		for i in range(int(steps)):
 			motorImpulse(feedMotorPls)
+
 
 #Returns bending pin to specified as 1st param. amount of steps to home pos., considers wire diameter and direction
 def pinReturn(steps_to_home, wire_thickness, direction):
@@ -149,6 +158,7 @@ def pinReturn(steps_to_home, wire_thickness, direction):
 
 	GPIO.output(benderPin, LOW)
 	print "Solenoid is in up position"
+
 
 #Homing routine with limiting switches
 def homingRoutine():
@@ -168,9 +178,11 @@ def homingRoutine():
 	print "Home position should be on step {}".format(middle_position)
 	rotatePin(cw, middle_position)
 
+
 #Temporar cap for reading commands from Web App
 def readCommandsFromUI():
 	pass
+
 
 #Creates CSV table with REAL and THEORETICAL angles
 #1st column - theoretical, 2nd - real, 3-rd - angle's type marker
@@ -193,13 +205,6 @@ def anglesTableCreation(theoretical_angle):
 	csvfile = open("manual_tuning.csv", "rb")
 	file = csv.reader(csvfile, delimiter = ',')
 
-	#counting length of CSV file 
-	counter = 0
-	for content in file:
-		counter += 1
-
-	# rangle = 0
-	# tangle = 0
 	rangles_list = []
 	tangles_list = []
 
@@ -211,7 +216,7 @@ def anglesTableCreation(theoretical_angle):
 	largestTAngle = 0
 
 	#check if CSV file is empty
-	if counter > 1:
+	if file == True:
 		for content in file:
 			tangle = content[0]
 			rangle = content[1]
@@ -235,7 +240,7 @@ def anglesTableCreation(theoretical_angle):
 	
 	#CHILD angles filling procedure. procedure runs until we meet meet largest element in theoretical angles list, 
 	#what means that it is 'PARENT' angle.
-	for angle in range(largestTAngle, abs(theoretical_angle)):
+	for angle in range(int(largestTAngle), int(abs(theoretical_angle))):
 		if theoretical_angle < 0:
 			angle *= -1
 		fwriter.writerow([angle, angle*rangle_in_tangle, "CHILD"])
