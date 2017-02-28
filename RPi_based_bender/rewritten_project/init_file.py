@@ -190,8 +190,10 @@ def anglesTableCreation(theoretical_angle):
 	bendWire(theoretical_angle)
 	steps_count = 0
 
-	while not readCommandsFromUI() == "reached home":
-		if readCommandsFromUI() == "make 1 step"
+	# while not readCommandsFromUI() == "reached home":
+	while not (GPIO.input(minSwitch) == 0):
+		# if readCommandsFromUI() == "make 1 step"
+		if (GPIO.input(maxSwitch) == 0):
 			if theoretical_angle > 0:
 				bendWire(1)
 			else if theoretical_angle < 0:
