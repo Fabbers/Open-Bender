@@ -1,4 +1,4 @@
-#import RPi.GPIO as GPIO
+import RPi.GPIO as GPIO
 import time
 import csv
 
@@ -196,7 +196,7 @@ def anglesTableCreation(theoretical_angle):
 		if (GPIO.input(maxSwitch) == 0):
 			if theoretical_angle > 0:
 				bendWire(1)
-			else if theoretical_angle < 0:
+			elif theoretical_angle < 0:
 				bendWire(-1)
 			else: break
 			steps_count += 1
