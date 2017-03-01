@@ -5,7 +5,7 @@ import json
 setup()
 anglesTableCreation(30)
 
-#wait(5)
+#wait(5000)
 # homingRoutine()
 #with open('json_sample.json') as data_file:    
 #    data = json.load(data_file)

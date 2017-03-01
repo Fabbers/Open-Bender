@@ -73,10 +73,10 @@ def setup():
 #Alternative timer
 def wait(mseconds):
 	start_time = time.time()
-	#mseconds = mseconds/1000
+	mseconds = mseconds/1000
 	while True:
 		current_time = time.time()
-		#print (float(current_time - start_time))
+#		print (float(current_time - start_time))
 		if float(current_time - start_time) >= mseconds:
 			break
 
@@ -189,20 +189,32 @@ def readCommandsFromUI():
 def anglesTableCreation(theoretical_angle):
 	bendWire(theoretical_angle)
 	steps_count = 0
+	real_angle = 0
+	
+	current_state = True
+        prev_state = True
 
 	# while not readCommandsFromUI() == "reached home":
-	while not (GPIO.input(minSwitch) == 0):
+	while not (GPIO.input(minSwitch) == False):
+		current_state = GPIO.input(maxSwitch)
 		# if readCommandsFromUI() == "make 1 step"
-		if (GPIO.input(maxSwitch) == 0):
-			if theoretical_angle > 0:
-				bendWire(1)
-			elif theoretical_angle < 0:
-				bendWire(-1)
-			else: break
-			steps_count += 1
+		if current_state != prev_state:
+			if (current_state == False):
+				wait(200)
+				control_current_state = GPIO.input(maxSwitch)
+				if control_current_state == False:
+					if theoretical_angle > 0:
+						bendWire(0.5)
+					elif theoretical_angle < 0:
+						bendWire(-0.5)
+					else: break
+					current_state = control_current_state
+					real_angle += 0.5
+					print "Angle turned back: ", real_angle
+		prev_state = current_state
 
-	real_angle = steps_count/BEND_MOTOR_STEPS_PER_DEGREE
-
+	#real_angle = steps_count/BEND_MOTOR_STEPS_PER_DEGREE
+	print "Real angle is: ", real_angle
 	# parentAngle = 0
 	csvfile = open("manual_tuning.csv", "rb")
 	file = csv.reader(csvfile, delimiter = ',')
@@ -239,12 +251,15 @@ def anglesTableCreation(theoretical_angle):
 	fwriter = csv.writer(csvfile, delimiter = ",")
 
 	rangle_in_tangle = real_angle/theoretical_angle
-	
+	print "Real angle in theoretical: ", rangle_in_tangle
+		
 	#CHILD angles filling procedure. procedure runs until we meet meet largest element in theoretical angles list, 
 	#what means that it is 'PARENT' angle.
 	for angle in range(int(largestTAngle), int(abs(theoretical_angle))):
 		if theoretical_angle < 0:
 			angle *= -1
+		print "Angle is: ", angle
+		print "Result: ", angle*rangle_in_tangle
 		fwriter.writerow([angle, angle*rangle_in_tangle, "CHILD"])
 
 	#appending last element as 'PARENT'
