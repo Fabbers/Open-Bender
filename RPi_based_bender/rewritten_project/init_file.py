@@ -54,218 +54,209 @@ lastPinPosition = 0
 
 
 def setup():
-	GPIO.setmode(GPIO.BCM)
+    GPIO.setmode(GPIO.BCM)
 
-	GPIO.setup(bendMotorPls, GPIO.OUT) 
-	GPIO.setup(feedMotorPls, GPIO.OUT)
-	GPIO.setup(benderPin, GPIO.OUT)
+    GPIO.setup(bendMotorPls, GPIO.OUT) 
+    GPIO.setup(feedMotorPls, GPIO.OUT)
+    GPIO.setup(benderPin, GPIO.OUT)
 
-	GPIO.setup(bendMotorAWO, GPIO.OUT) 
-	GPIO.setup(feedMotorAWO, GPIO.OUT)
-	
-	GPIO.setup(bendMotorDir, GPIO.OUT) 
-	GPIO.setup(feedMotorDir, GPIO.OUT)
-	
-	GPIO.setup(minSwitch, GPIO.IN, pull_up_down=GPIO.PUD_UP) 
-	GPIO.setup(maxSwitch, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+    GPIO.setup(bendMotorAWO, GPIO.OUT) 
+    GPIO.setup(feedMotorAWO, GPIO.OUT)
+    
+    GPIO.setup(bendMotorDir, GPIO.OUT) 
+    GPIO.setup(feedMotorDir, GPIO.OUT)
+    
+    GPIO.setup(minSwitch, GPIO.IN, pull_up_down=GPIO.PUD_UP) 
+    GPIO.setup(maxSwitch, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
 
 #Alternative timer
 def wait(mseconds):
-	start_time = time.time()
-	mseconds = mseconds/1000
-	while True:
-		current_time = time.time()
-#		print (float(current_time - start_time))
-		if float(current_time - start_time) >= mseconds:
-			break
+    start_time = time.time()
+    mseconds = mseconds/1000
+    while True:
+        current_time = time.time()
+        #print (float(current_time - start_time))
+        if float(current_time - start_time) >= mseconds:
+            break
 
 
 #Makes one motor impulse of specified motor as parameter
 def motorImpulse(motor):
-	GPIO.output(motor, GPIO.HIGH)
-	wait(pulseWidth) 
-	GPIO.output(motor, GPIO.LOW)
-	wait(pulseDelay)
+    GPIO.output(motor, GPIO.HIGH)
+    wait(pulseWidth) 
+    GPIO.output(motor, GPIO.LOW)
+    wait(pulseDelay)
 
 
 #Rotates bending to specified amount of steps in specified direction
 def rotatePin(direction, steps):
-	GPIO.output(bendMotorDir, direction)
+    GPIO.output(bendMotorDir, direction)
 
-	for i in range(int(steps)):
-		motorImpulse(bendMotorPls)
-		# print "Bended to {} angle".format(i/BEND_MOTOR_STEPS_PER_DEGREE)
+    for i in range(int(steps)):
+        motorImpulse(bendMotorPls)
+        # print "Bended to {} angle".format(i/BEND_MOTOR_STEPS_PER_DEGREE)
 
 
 #Bends wire for specified angle, could be negative
 def bendWire(angle):
-	angles_table = open("manual_tuning.csv", "rb")
-	file = csv.reader(angles_table, delimiter = ',')
+    angles_table = open("manual_tuning.csv", "rb")
+    file = csv.reader(angles_table, delimiter = ',')
 
-	#dictionary to store all angles from file
-	if file == True:
-		angles_dict = {}
-		for angle in file:
-			theoretical_angle = int(angle[0])
-			real_angle = int(angle[1])
-			angles_dict[theoretical_angle] = real_angle
+    #dictionary to store all angles from file
+    if file == True:
+        angles_dict = {}
+        for angle in file:
+            theoretical_angle = int(angle[0])
+            real_angle = int(angle[1])
+            angles_dict[theoretical_angle] = real_angle
 
-		bending_angle = angles_dict[angle]
-	else:
-		bending_angle = angle
+        bending_angle = angles_dict[angle]
+    else:
+        bending_angle = angle
 
-	if bending_angle != 0:
-		print "Bending to {} degrees".format(bending_angle)
-		direction = cw
-		reversedir = ccw
+    if bending_angle != 0:
+        print "Bending to {} degrees".format(bending_angle)
+        direction = cw
+        reversedir = ccw
 
-		if bending_angle < 0:
-			direction = ccw
-			reversedir = cw
+        if bending_angle < 0:
+            direction = ccw
+            reversedir = cw
 
-		steps = 0
-		bending_angle = abs(bending_angle)
-		steps = bending_angle * BEND_MOTOR_STEPS_PER_DEGREE
-		print "Steps {}".format(steps)
-		rotatePin(direction, steps)
+        steps = 0
+        bending_angle = abs(bending_angle)
+        steps = bending_angle * BEND_MOTOR_STEPS_PER_DEGREE
+        print "Steps {}".format(steps)
+        rotatePin(direction, steps)
 
 
 #Feeds wire for specified length in mm
 def feedWire(length):
-	if length != 0:
-		print "Feeding {}".format(length)
-		steps = length * FEED_MOTOR_STEPS_PER_MILIMETER
-		print "Steps {}".format(steps)
-		GPIO.output(feedMotorDir, 1)
+    if length != 0:
+        print "Feeding {}".format(length)
+        steps = length * FEED_MOTOR_STEPS_PER_MILIMETER
+        print "Steps {}".format(steps)
+        GPIO.output(feedMotorDir, 1)
 
-		for i in range(int(steps)):
-			motorImpulse(feedMotorPls)
+        for i in range(int(steps)):
+            motorImpulse(feedMotorPls)
 
 
 #Returns bending pin to specified as 1st param. amount of steps to home pos., considers wire diameter and direction
 def pinReturn(steps_to_home, wire_thickness, direction):
-	steps = steps_to_home + BEND_MOTOR_STEPS_PER_DEGREE * (wire_thickness/2.0)
-	GPIO.output(benderPin, HIGH)
-	print "Solenoid is hidden"
+    steps = steps_to_home + BEND_MOTOR_STEPS_PER_DEGREE * (wire_thickness/2.0)
+    GPIO.output(benderPin, HIGH)
+    print "Solenoid is hidden"
 
-	if direction == ccw:
-		print "Pin is turning in CCW direction"
-		rotatePin(cw, steps)
-	elif direction == cw:
-		print "Pin is turning in CW direction"
-		rotatePin(ccw, steps)
+    if direction == ccw:
+        print "Pin is turning in CCW direction"
+        rotatePin(cw, steps)
+    elif direction == cw:
+        print "Pin is turning in CW direction"
+        rotatePin(ccw, steps)
 
-	GPIO.output(benderPin, LOW)
-	print "Solenoid is in up position"
+    GPIO.output(benderPin, LOW)
+    print "Solenoid is in up position"
 
 
 #Homing routine with limiting switches
 def homingRoutine():
-	steps_count = 0
+    steps_count = 0
 
-	while not (GPIO.input(minSwitch) == 0):
-		rotatePin(cw, 1)
-	
-	print "Minimum limit switch reached"
+    while not (GPIO.input(minSwitch) == 0):
+        rotatePin(cw, 1)
+    
+    print "Minimum limit switch reached"
 
-	while not (GPIO.input(maxSwitch) == 0):
-		rotatePin(ccw, 1)
-		steps_count += 1
+    while not (GPIO.input(maxSwitch) == 0):
+        rotatePin(ccw, 1)
+        steps_count += 1
 
-	print "Maximum limit switch reached\nTotal amount of steps on scale: {}".format(steps_count)	
-	middle_position = steps_count/2.0
-	print "Home position should be on step {}".format(middle_position)
-	rotatePin(cw, middle_position)
+    print "Maximum limit switch reached\nTotal amount of steps on scale: {}".format(steps_count)    
+    middle_position = steps_count/2.0
+    print "Home position should be on step {}".format(middle_position)
+    rotatePin(cw, middle_position)
 
 
 #Temporar cap for reading commands from Web App
 def readCommandsFromUI():
-	pass
+    pass
 
 
 #Creates CSV table with REAL and THEORETICAL angles
 #1st column - theoretical, 2nd - real, 3-rd - angle's type marker
 def anglesTableCreation(theoretical_angle):
-	bendWire(theoretical_angle)
-	steps_count = 0
-	real_angle = 0
-	
-	current_state = True
-        prev_state = True
+    bendWire(theoretical_angle)
+    steps_count = 0
+    
+    current_state = True
+    prev_state = True
 
-	# while not readCommandsFromUI() == "reached home":
-	while not (GPIO.input(minSwitch) == False):
-		current_state = GPIO.input(maxSwitch)
-		# if readCommandsFromUI() == "make 1 step"
-		if current_state != prev_state:
-			if (current_state == False):
-				wait(200)
-				control_current_state = GPIO.input(maxSwitch)
-				if control_current_state == False:
-					if theoretical_angle > 0:
-						bendWire(0.5)
-					elif theoretical_angle < 0:
-						bendWire(-0.5)
-					else: break
-					current_state = control_current_state
-					real_angle += 0.5
-					print "Angle turned back: ", real_angle
-		prev_state = current_state
+    # while not readCommandsFromUI() == "reached home":
+    while not (GPIO.input(minSwitch) == False):
+        current_state = GPIO.input(maxSwitch)
+        # if readCommandsFromUI() == "make 1 step"
+        if current_state != prev_state:
+            if (current_state == False):
+                wait(200)
+                control_current_state = GPIO.input(maxSwitch)
+                if control_current_state == False:
+                    if theoretical_angle > 0:
+                        bendWire(0.5)
+                    elif theoretical_angle < 0:
+                        bendWire(-0.5)
+                    else: break
+                    current_state = control_current_state
+                    real_angle += 0.5
+                    print "Angle turned back: ", real_angle
+        prev_state = current_state
 
-	#real_angle = steps_count/BEND_MOTOR_STEPS_PER_DEGREE
-	print "Real angle is: ", real_angle
-	# parentAngle = 0
-	csvfile = open("manual_tuning.csv", "rb")
-	file = csv.reader(csvfile, delimiter = ',')
+    #real_angle = steps_count/BEND_MOTOR_STEPS_PER_DEGREE
+    print "Real angle is: ", real_angle
 
-	rangles_list = []
-	tangles_list = []
+    try:
+        csvfile = open("manual_tuning.csv", "r")
+    except IOError as e:
+        csvfile = open("manual_tuning.csv", "w")
+        csvfile.close()
+        csvfile = open("manual_tuning.csv", "r")
 
-	#real angles coefficient
-	rangle_in_tangle = 0
+    freader = csv.reader(csvfile, delimiter = ',')        
+    csvfile.close()
 
-	#largest theoretical and real angle
-	largestParentAngle = 0
-	largestTAngle = 0
+    rangles_list = []
+    tangles_list = []
 
-	#check if CSV file is empty
-	if file == True:
-		for content in file:
-			tangle = content[0]
-			rangle = content[1]
-			rangles_list.append(rangle)
-			tangles_list.append(tangle)
+    #largest theoretical angle 
+    largestTAngle = 0
 
-		rangles_list.sort()
-		tangles_list.sort()
+    #check if CSV freader is empty
+    if freader == True:
+        for content in freader:
+            tangle = content[0]
+            tangles_list.append(tangle)
 
-		largestParentAngle = float(rangles_list[-1])
-		largestTAngle = float(tangles_list[-1])
-		
-		print "Theoretical angle from file: {}\nReal angle from file: {}".format(tangle, rangle)
+        tangles_list.sort()
 
-	csvfile.close()
-	csvfile = open("manual_tuning.csv", "a")
+        largestTAngle = float(tangles_list[-1])
 
-	fwriter = csv.writer(csvfile, delimiter = ",")
+    csvfile = open("manual_tuning.csv", "a")
 
-	rangle_in_tangle = real_angle/theoretical_angle
-	print "Real angle in theoretical: ", rangle_in_tangle
-		
-	#CHILD angles filling procedure. procedure runs until we meet meet largest element in theoretical angles list, 
-	#what means that it is 'PARENT' angle.
-	for angle in range(int(largestTAngle), int(abs(theoretical_angle))):
-		if theoretical_angle < 0:
-			angle *= -1
-		print "Angle is: ", angle
-		print "Result: ", angle*rangle_in_tangle
-		fwriter.writerow([angle, angle*rangle_in_tangle, "CHILD"])
+    fwriter = csv.writer(csvfile, delimiter = ",")
 
-	#appending last element as 'PARENT'
-	if theoretical_angle < 0:
-			fwriter.writerow([-theoretical_angle, -real_angle, "PARENT"])
-	else:
-		fwriter.writerow([theoretical_angle, real_angle, "PARENT"])
+    rangle_in_tangle = real_angle/theoretical_angle
+    print "Real angle in theoretical: ", rangle_in_tangle
+        
+    #CHILD angles filling procedure. procedure runs until we meet meet largest element in theoretical angles list, 
+    #what means that it is 'PARENT' angle.
+    for angle in range(int(largestTAngle), int(abs(theoretical_angle)+1)):
+        if theoretical_angle < 0:
+            angle *= -1
+        
+        if abs(angle) is int(abs(theoretical_angle)):
+            fwriter.writerow([angle, angle*rangle_in_tangle, "PARENT"])
+        else:
+            fwriter.writerow([angle, angle*rangle_in_tangle, "CHILD"])
 
-	csvfile.close()
+    csvfile.close()
