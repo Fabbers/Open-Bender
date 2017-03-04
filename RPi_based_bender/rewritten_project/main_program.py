@@ -11,12 +11,13 @@ setup()
 #    data = json.load(data_file)
 
 #print data
-#assert (GPIO.HIGH) == True
+assert (GPIO.LOW) == False
+assert (GPIO.LOW) == 0
 for i in range(2):
-	feedWire(50)
-	bendWire(45)
+#	feedWire(50)
+#	bendWire(-45)
 #	wait(1)	
 #	feedWire(50)	
 #	motorImpulse(bendMotorPls)
-#	rotatePin(GPIO.LOW, 20)
+	rotatePin(1, 2094)
 #wait(5)

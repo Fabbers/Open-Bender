@@ -28,11 +28,11 @@ feedMotorPls = 21 #RPI_GPIO_P1_11;
 benderPin = 14 #RPI_GPIO_P1_14;
 
 # AWO pins to allow motor shaft to free spin
-bendMotorAWO = 19 #RPI_GPIO_P1_3;
+bendMotorAWO = 19 #RPI_GPIO_P1_6;
 feedMotorAWO = 20 #RPI_GPIO_P1_5;
 
 # Direction pins to select drive direction
-bendMotorDir = 13 #RPI_GPIO_P1_6;
+bendMotorDir = 13 #RPI_GPIO_P1_3;
 feedMotorDir = 16 #RPI_GPIO_P1_8;
 
 # Limit Switches
@@ -140,7 +140,7 @@ def feedWire(length):
         print "Feeding {}".format(length)
         steps = length * FEED_MOTOR_STEPS_PER_MILIMETER
         print "Steps {}".format(steps)
-        GPIO.output(feedMotorDir, True)
+        GPIO.output(feedMotorDir, 0)
 
         for i in range(int(steps)):
             motorImpulse(feedMotorPls)
