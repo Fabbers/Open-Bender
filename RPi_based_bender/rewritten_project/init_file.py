@@ -71,13 +71,13 @@ def setup():
 
 
 #Alternative timer
-def wait(mseconds):
+def wait(seconds):
     start_time = time.time()
-    mseconds = mseconds/1000
+   #mseconds = seconds/1000
     while True:
         current_time = time.time()
         #print (float(current_time - start_time))
-        if float(current_time - start_time) >= mseconds:
+        if float(current_time - start_time) >= seconds:
             break
 
 
@@ -85,9 +85,10 @@ def wait(mseconds):
 def motorImpulse(motor):
     GPIO.output(motor, GPIO.HIGH)
     wait(pulseWidth) 
+    #time.sleep(0.0001)
     GPIO.output(motor, GPIO.LOW)
     wait(pulseDelay)
-
+    #time.sleep(0.001)
 
 #Rotates bending to specified amount of steps in specified direction
 def rotatePin(direction, steps):
@@ -95,7 +96,7 @@ def rotatePin(direction, steps):
 
     for i in range(int(steps)):
         motorImpulse(bendMotorPls)
-        # print "Bended to {} angle".format(i/BEND_MOTOR_STEPS_PER_DEGREE)
+        print "Bended to {} angle".format(i/BEND_MOTOR_STEPS_PER_DEGREE)
 
 
 #Bends wire for specified angle, could be negative
@@ -137,7 +138,7 @@ def feedWire(length):
         print "Feeding {}".format(length)
         steps = length * FEED_MOTOR_STEPS_PER_MILIMETER
         print "Steps {}".format(steps)
-        GPIO.output(feedMotorDir, 1)
+        GPIO.output(feedMotorDir, True)
 
         for i in range(int(steps)):
             motorImpulse(feedMotorPls)

@@ -3,7 +3,7 @@ import json
 
 
 setup()
-anglesTableCreation(30)
+#anglesTableCreation(30)
 
 #wait(5000)
 # homingRoutine()
@@ -12,11 +12,12 @@ anglesTableCreation(30)
 
 #print data
 
-# for i in range(2):
-# 	feedWire(50)
-# 	wait(0.001)
-# 	bendWire(45)
-# 	wait(0.001)	
-	
-
+for i in range(5):
+#	feedWire(50)
+#	wait(1)
+#	bendWire(45)
+#	wait(1)	
+#	feedWire(50)	
+#	motorImpulse(bendMotorPls)
+	rotatePin(cw, 2000)
 #wait(5)
