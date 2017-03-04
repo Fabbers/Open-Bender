@@ -22,17 +22,18 @@ CMD_3D_BEND = 124
 
 # pin assignments
 # Motor pulse and solenoid pins
-bendMotorPls = 9 #RPI_GPIO_P1_9;
-feedMotorPls = 11 #RPI_GPIO_P1_11;
-benderPin = 12 #RPI_GPIO_P1_12;
+bendMotorPls = 26 #RPI_GPIO_P1_9;
+feedMotorPls = 21 #RPI_GPIO_P1_11;
+
+benderPin = 14 #RPI_GPIO_P1_14;
 
 # AWO pins to allow motor shaft to free spin
-bendMotorAWO = 3 #RPI_GPIO_P1_3;
-feedMotorAWO = 5 #RPI_GPIO_P1_5;
+bendMotorAWO = 19 #RPI_GPIO_P1_3;
+feedMotorAWO = 20 #RPI_GPIO_P1_5;
 
 # Direction pins to select drive direction
-bendMotorDir = 6 #RPI_GPIO_P1_6;
-feedMotorDir = 8 #RPI_GPIO_P1_8;
+bendMotorDir = 13 #RPI_GPIO_P1_6;
+feedMotorDir = 16 #RPI_GPIO_P1_8;
 
 # Limit Switches
 minSwitch = 23 #RPI_GPIO_P1_23;
@@ -92,11 +93,12 @@ def motorImpulse(motor):
 
 #Rotates bending to specified amount of steps in specified direction
 def rotatePin(direction, steps):
+    print direction, steps
     GPIO.output(bendMotorDir, direction)
 
     for i in range(int(steps)):
         motorImpulse(bendMotorPls)
-        print "Bended to {} angle".format(i/BEND_MOTOR_STEPS_PER_DEGREE)
+        #print "Bended to {} angle".format(i/BEND_MOTOR_STEPS_PER_DEGREE)
 
 
 #Bends wire for specified angle, could be negative
