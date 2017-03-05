@@ -4,7 +4,7 @@ import json
 
 setup()
 wait(3)
-anglesTableCreation(30)
+anglesTableCreation(20)
 
 #wait(5)
 #homingRoutine()

@@ -1,6 +1,7 @@
 import RPi.GPIO as GPIO
 import time
 import csv
+import os
 
 FEED_MOTOR_STEPS_PER_REVOLUTION = 4000 
 FEED_MOTOR_SHAFT_DIAMETER = 30.4
@@ -96,7 +97,6 @@ def motorImpulse(motor):
 
 #Rotates bending to specified amount of steps in specified direction
 def rotatePin(direction, steps):
-    print direction, steps
     GPIO.output(bendMotorDir, direction)
 
     for i in range(int(steps)):
@@ -154,7 +154,6 @@ def pinReturn(steps_to_home, wire_thickness, direction):
     steps = steps_to_home + BEND_MOTOR_STEPS_PER_DEGREE * (wire_thickness/2.0)
     GPIO.output(benderPin, HIGH)
     print "Solenoid is hidden"
-
     if direction == ccw:
         print "Pin is turning in CCW direction"
         rotatePin(cw, steps)
@@ -195,61 +194,73 @@ def readCommandsFromUI():
 def anglesTableCreation(theoretical_angle):
     bendWire(theoretical_angle)
     steps_count = 0
+    real_angle = 0
     
     current_state = True
     prev_state = True
-
+    
     # while not readCommandsFromUI() == "reached home":
     while not (GPIO.input(minSwitch) == 0):
         current_state = GPIO.input(maxSwitch)
         # if readCommandsFromUI() == "make 1 step"
-	print "waiting for state change"
         if current_state != prev_state:
             if (current_state == 0):
 		print "first state check"
-                wait(200)
+                wait(0.2)
                 control_current_state = GPIO.input(maxSwitch)
                 if control_current_state == 0:
 		    print "control state check"
                     if theoretical_angle > 0:
-                        bendWire(0.5)
-                    elif theoretical_angle < 0:
                         bendWire(-0.5)
+                    elif theoretical_angle < 0:
+                        bendWire(0.5)
                     else: break
                     current_state = control_current_state
                     real_angle += 0.5
                     print "Angle turned back: ", real_angle
         prev_state = current_state
-
+    
     #real_angle = steps_count/BEND_MOTOR_STEPS_PER_DEGREE
     print "Real angle is: ", real_angle
 
     try:
         csvfile = open("manual_tuning.csv", "r")
+	
     except IOError as e:
         csvfile = open("manual_tuning.csv", "w")
         csvfile.close()
         csvfile = open("manual_tuning.csv", "r")
 
     freader = csv.reader(csvfile, delimiter = ',')        
+    
+    file_as_list = list(freader)
     csvfile.close()
 
     rangles_list = []
     tangles_list = []
-
-    #largest theoretical angle 
-    largestTAngle = 0
+    
+    print "File's lenght: ", len(file_as_list)
 
     #check if CSV freader is empty
-    if freader == True:
+    if len(file_as_list) > 0:
+        csvfile = open("manual_tuning.csv")
+        freader = csv.reader(csvfile, delimiter=',')
+
         for content in freader:
             tangle = content[0]
-            tangles_list.append(tangle)
+            tangles_list.append(int(tangle))
+            print "Theoretical angle: ",tangle
 
+        print "Before sort: ",tangles_list
         tangles_list.sort()
+	print "After sort: ",tangles_list
+	
+        largestTAngle = float(tangles_list[-1]) #largest theoretical angle
+    else: 
+        largestTAngle = 0
 
-        largestTAngle = float(tangles_list[-1])
-
+    csvfile.close()
+    print "Largest angle in file is: ", largestTAngle
     csvfile = open("manual_tuning.csv", "a")
 
     fwriter = csv.writer(csvfile, delimiter = ",")
