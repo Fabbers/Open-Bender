@@ -200,14 +200,17 @@ def anglesTableCreation(theoretical_angle):
     prev_state = True
 
     # while not readCommandsFromUI() == "reached home":
-    while not (GPIO.input(minSwitch) == False):
+    while not (GPIO.input(minSwitch) == 0):
         current_state = GPIO.input(maxSwitch)
         # if readCommandsFromUI() == "make 1 step"
+	print "waiting for state change"
         if current_state != prev_state:
-            if (current_state == False):
+            if (current_state == 0):
+		print "first state check"
                 wait(200)
                 control_current_state = GPIO.input(maxSwitch)
-                if control_current_state == False:
+                if control_current_state == 0:
+		    print "control state check"
                     if theoretical_angle > 0:
                         bendWire(0.5)
                     elif theoretical_angle < 0:
